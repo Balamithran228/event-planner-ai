@@ -6,6 +6,10 @@ from BudgetAllocation import (
     json
 )
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_amazon_products_for_decorations_with_allData(response_Dict):
     # step 1 fetch busget data with event data
@@ -54,7 +58,7 @@ def fetch_amazon_products_from_keywords(keyword_data):
     url = "https://real-time-amazon-data.p.rapidapi.com/search"
 
     headers = {
-        "x-rapidapi-key": "605cec127fmsh5b5d39f12d0cd8ep118be3jsn3aa0b319d80b",
+        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
         "x-rapidapi-host": "real-time-amazon-data.p.rapidapi.com"
     }
 

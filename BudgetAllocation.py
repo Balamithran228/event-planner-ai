@@ -9,6 +9,12 @@ from themeBaseCode import (
 )
 
 def allocate_budget_with_guided_llm(user_input):
+    """
+    Allocates the total budget into categories (food, entertainment, decorations) using a hybrid approach:
+    1. Uses rule-based percentage guidelines based on event type.
+    2. Uses an LLM to refine the allocation specifically for the event's theme and detailed requirements.
+    3. Ensures the total sum exactly matches the budget.
+    """
     # Define rule-based allocation ratios by event type
     allocation_guidelines = {
         "Wedding": {
@@ -92,10 +98,8 @@ def allocate_budget_with_guided_llm(user_input):
         json_match = re.search(r'(\{.*\})', response, re.DOTALL)
         if json_match:
             json_str = json_match.group(1)
-            # print("Extracted JSON string:", json_str)
             response_dict = json.loads(json_str)
         else:
-            # Direct parse attempt
             response_dict = json.loads(response)
         
         # Validate the allocation to ensure it matches the total budget
@@ -119,7 +123,6 @@ def allocate_budget_with_guided_llm(user_input):
             match = re.search(json_pattern, response, re.DOTALL)
             if match:
                 json_str = match.group(1)
-                # print("Attempting to parse extracted JSON:", json_str)
                 response_dict = json.loads(json_str)
                 return response_dict
         except Exception as inner_e:
@@ -140,9 +143,12 @@ def allocate_budget_with_guided_llm(user_input):
 
 
 def get_BudgetData(input_data):
+    """
+    Wrapper function to generate budget allocation and structure the response.
+    Returns:
+        dict: Combined dictionary of input event details and the calculated budget allocation.
+    """
     # Test the function
-    # user_data = get_answer(input_data)
-    #print("User data received:", json.dumps(user_data, indent=2))
     result = allocate_budget_with_guided_llm(input_data)
 
     combined_output = {

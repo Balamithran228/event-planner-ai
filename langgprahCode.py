@@ -8,6 +8,16 @@ from EventKeyGenAmazonLink import get_amazon_products_for_decorations_with_allDa
 
 # Define the state schema
 class GraphState(TypedDict):
+    """
+    Represents the state of the event planning graph.
+    Attributes:
+        event_data: Raw event data.
+        themes_json: JSON string containing generated themes.
+        selected_theme_index: Index of the selected theme (1-based).
+        event_details: Processed event details including selected theme.
+        budget_allocation: storage for budget breakdown.
+        Decoration_Recommandations: Storage for Amazon product recommendations.
+    """
     event_data: Dict[str, Any]
     themes_json: Dict[str, Any]
     selected_theme_index: int
@@ -16,53 +26,11 @@ class GraphState(TypedDict):
     Decoration_Recommandations: Dict[str, Any]
 
 
-# def select_theme_node(state: GraphState) -> GraphState:
-#     print("1")
-#     print(state)
-#     selected_index = state.get("selected_theme_index", 1)
-#     selected_theme = extract_theme_details(str(state["themes_json"]), selected_index)
-#     state["event_data"]["theme"] = json.loads(selected_theme)
-#     print(type(state["event_data"]),type(state["event_data"]["theme"]))
-#     print("11")
-#     r = {"event_details": state["event_data"]}
-#     print(r)
-#     return r
-# import json
-
-# def select_theme_node(state: GraphState) -> GraphState:
-#     print("1")
-#     print(state)
-
-#     # Get the selected index and extract the theme details
-#     selected_index = state.get("selected_theme_index", 1)
-#     selected_theme = extract_theme_details(str(state["themes_json"]), selected_index)
-#     r = json.loads(selected_theme)
-#     print("Selected Theme:", selected_theme," 122")  # Print the selected theme to debug
-#     print(selected_theme,type(selected_theme))
-#     print(json.loads(selected_theme),type(json.loads(selected_theme)))
-#     # Check if selected_theme is not empty and seems to be valid JSON
-#     if selected_theme.strip():  # Check if the string is not empty
-#         try:
-#             # Try to load the theme string into a Python dictionary
-#             state["event_data"]["theme"] = json.loads(selected_theme)
-#             print(type(state["event_data"]), type(state["event_data"]["theme"]))
-#         except json.JSONDecodeError as e:
-#             print(f"Error decoding JSON: {e}")
-#             state["event_data"]["theme"] = {"error": "Invalid theme data"}
-#             print("Fallback to error data:", state["event_data"]["theme"])
-#     else:
-#         print("Selected theme is empty!")
-#         state["event_data"]["theme"] = {"error": "Theme data is missing"}
-    
-#     print("11")
-#     r = {"event_details": state["event_data"]}
-#     print(r)
-    
-#     return r
-
 def select_theme_node(state: GraphState) -> GraphState:
-    print("1")
-    print(state)
+    """
+    Node to select a specific theme from the generated options.
+    It parses the theme JSON and updates the event details in the state.
+    """
 
     # Get the selected index and extract the theme details
     selected_index = state.get("selected_theme_index", 1)
@@ -85,10 +53,7 @@ def select_theme_node(state: GraphState) -> GraphState:
             state["event_data"]["theme"] = {"error": "Invalid theme data"}
             print("Fallback to error data:", state["event_data"]["theme"])
     
-    print("11")
     r = {"event_details": state["event_data"]}
-    print(r)
-    
     return r
 
 # Wrapper for get_BudgetData() from file2
@@ -96,8 +61,6 @@ def budget_node(state: GraphState) -> GraphState:
     """
     Calls the existing get_BudgetData() function and updates the state.
     """
-    print("2")
-    print(state)
     # We pass the event data to get_BudgetData
     event_details = state.get("event_details", {})
     
@@ -114,7 +77,6 @@ def decoration_node(state: GraphState) -> GraphState:
     Calls the existing get_amazon_products_for_decorations_with_allData() function
     and updates the state.
     """
-    print("3")
     # We need to pass both event and budget data to this function
     combined_data = {
         "event_details": state.get("event_details", {}),
@@ -128,6 +90,15 @@ def decoration_node(state: GraphState) -> GraphState:
     return decoration_result
 
 def create_event_planning_graph():
+    """
+    Constructs the LangGraph workflow for event planning.
+    Nodes:
+        - theme_selection: Selects the user-preferred theme.
+        - budget_step: Allocates budget based on event details.
+        - decoration_step: Suggests Amazon products for decorations.
+    Flow:
+        theme_selection -> budget_step -> decoration_step -> END
+    """
     workflow = StateGraph(GraphState)
     
 

@@ -62,38 +62,26 @@ give each theme in json list l
 chain = theme_prompt | llm | StrOutputParser()
 
 def generate_themes(user_input):
+    """
+    Generates 3 theme options based on user input (budget, guests, etc.) using Gemini.
+    """
     response = chain.invoke(user_input)
     return response
 
 
-# def extract_theme_details(output_text, theme_number):
-#     # Extract JSON string from between triple backticks
-#     json_pattern = r"```json\s*([\s\S]*?)\s*```"
-#     match = re.search(json_pattern, output_text)
-#     print("json_pattern",output_text)
-#     if not match:
-#         return "Could not find JSON data in the output"
-    
-#     json_str = match.group(1)
-    
-#     try:
-#         # Parse JSON string into Python object
-#         themes = json.loads(json_str)
-        
-#         # Check if the theme number is valid
-#         if theme_number < 1 or theme_number > len(themes):
-#             return f"Invalid theme number. Please select a theme between 1 and {len(themes)}"
-        
-#         # Return the requested theme (adjusting for 0-based indexing)
-#         return themes[theme_number - 1]
-    
-#     except json.JSONDecodeError:
-#         return "Error parsing JSON data"
-#     except Exception as e:
-#         return f"An error occurred: {str(e)}"
-
 
 def extract_theme_details(output_text, theme_number):
+    """
+    Extracts the details of a specific theme from the LLM's JSON output.
+    Handles both direct JSON responses and Markdown-formatted code blocks.
+    
+    Args:
+        output_text (str): The raw text response from the LLM.
+        theme_number (int): The 1-based index of the theme to select.
+        
+    Returns:
+        str: JSON string of the selected theme, or empty dict string on failure.
+    """
     # First check if the output_text is already a representation of a Python list
     if output_text.startswith('[') and output_text.endswith(']'):
         try:
@@ -101,7 +89,6 @@ def extract_theme_details(output_text, theme_number):
             print("output_text",output_text,type(output_text))
             # themes = json.loads(output_text[1:-1])
             themes = ast.literal_eval(output_text)
-            print("themese 123 output")
             
             # Check if the theme number is valid
             if theme_number < 1 or theme_number > len(themes):
@@ -117,7 +104,6 @@ def extract_theme_details(output_text, theme_number):
     # Extract JSON string from between triple backticks (original approach)
     json_pattern = r"```json\s*([\s\S]*?)\s*```"
     match = re.search(json_pattern, output_text)
-    print("Output text received:", output_text[:100])  # Print first 100 chars to debug
     
     if not match:
         print("No JSON match found in the output")

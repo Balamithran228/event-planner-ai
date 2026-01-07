@@ -12,9 +12,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_amazon_products_for_decorations_with_allData(response_Dict):
+    """
+    Generates Amazon search keywords for decorations based on the event theme and budget using an LLM.
+    Then fetches actual product data from Amazon using the RapidAPI Real-Time Amazon Data API.
+    
+    Args:
+        response_Dict: Dictionary containing event details and budget allocation.
+        
+    Returns:
+        dict: The input dictionary updated with 'Decoration_Recommandations'.
+    """
     # step 1 fetch busget data with event data
     print(response_Dict)
-    print("31")
     # Step 2: Create Prompt Template
     prompt_template = PromptTemplate.from_template("""
     You are an expert {event_type} planner.
@@ -42,15 +51,15 @@ def get_amazon_products_for_decorations_with_allData(response_Dict):
     chain = prompt_template | llm | StrOutputParser()
     response = chain.invoke(prompt_inputs)
     keyword_data = eval(response[10:-4])
-    # print(keyword_data)
-    print("32")
     result = fetch_amazon_products_from_keywords(keyword_data)
     response_Dict["Decoration_Recommandations"] = result
-    # print(json.dumps(response_Dict, indent=4, ensure_ascii=False))
-    print("33")
     return response_Dict
 
 def fetch_amazon_products_from_keywords(keyword_data):
+    """
+    Fetches product information from Amazon for the generated keywords.
+    Uses RapidAPI to search for products within the allocated per-item budget.
+    """
     keywords = keyword_data[:-2]
     amount_per_product = keyword_data[-2]
     total_amount = keyword_data[-1]
@@ -80,17 +89,11 @@ def fetch_amazon_products_from_keywords(keyword_data):
             "is_prime":"false",
             "deals_and_discounts":"NONE"
             }
-        # print(keyword,type(keyword),amount_per_product,type(amount_per_product))
 
 
         try:
-            print("fetch before")
             res = requests.get(url, headers=headers, params=querystring)
             data = res.json()
-            print("fetch after")
-            # print()
-            # print(data)
-            # print()
         except Exception as e:
             print(f"Error fetching keyword '{keyword}': {e}")
             continue
